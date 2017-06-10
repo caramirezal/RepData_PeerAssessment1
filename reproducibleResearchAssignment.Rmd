@@ -1,0 +1,137 @@
+---
+title: "Reproducible Research Assignment"
+author: "Carlos Ramirez"
+date: "June 10, 2017"
+output: html_document
+---
+
+This report show the analysis and processing of ...
+
+### 1. Reading in the dataset and/or processing the data
+
+```{r}
+activity <- read.csv(unz("activity.zip","activity.csv"),
+                     header = TRUE,
+                     colClasses = c("numeric","character","numeric"))
+activity <- transform(activity, date = as.Date(date))
+```
+
+### 2. Total number of steps taken each day
+
+The number of steps were summed with a constant equal to 1 and then the logaritm was taken. This transformation was taken because the distribution have a lot of zero values
+which skews the histogram.
+
+
+```{r}
+steps <- with(activity,tapply(steps,date,sum))
+hist(steps,breaks = 50,col = "steelblue",
+     main = "Number of dairy steps distribution",
+     xlab = "Number of steps")
+```
+
+### 3. Mean and median of steps for each day
+
+The median are shown according to the left axis.
+
+```{r}
+par( mar= c(5,5,5,5))
+dates <- unique(activity$date)
+means <- with(activity, tapply(steps,date, function(x) mean(x,na.rm = TRUE)))
+medians <- with(activity, tapply(steps,date, function(x) median(x,na.rm = TRUE)))
+plot(dates,means,pch=19,col="red",ylab = "Mean")
+par(new=TRUE)
+plot(dates,medians,pch=20,col="green",axes = FALSE,xlab = NA,ylab = NA)
+axis(side=4)
+mtext(side = 4,line = 3,"Median")
+```
+
+
+### 4. Time series plot of the average number of steps taken
+
+```{r}
+intervals <- unique(activity$interval)
+mean.av <- with(activity,tapply(steps, interval,function(x) mean(x,na.rm = TRUE)))
+plot(intervals,mean.av,type = "l",col="red",
+     main = "Average steps across day intervals")
+```
+
+### 5. The 5-minute interval that, on average, contains the maximum number of steps
+
+
+
+```{r}
+maxActivity <- intervals[which(mean.av==max(mean.av))]
+maxActivity
+```
+
+### 6. Code to describe and show a strategy for imputing missing data
+
+#### 6.1 Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with 𝙽𝙰s)
+
+```{r}
+complete <- complete.cases(activity)
+activity.complete <- activity[complete,]
+nrow(activity.complete)
+```
+
+
+
+#### 6.2 Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc
+
+
+Traverse steps. If the number of steps is NA take the median of that day.
+
+#### 6.3 Create a new dataset that is equal to the original dataset but with the missing data filled in
+
+
+```{r}
+activity.inputed <- activity
+for (i in 1:length(activity$steps)) {
+        if ( is.na(activity$steps[i]) ) {
+                day <- activity$date[i]
+                activity.inputed$steps[i] <- mean(means,na.rm = TRUE)
+                
+        }
+}
+
+summary(activity.inputed$steps)
+```
+
+
+Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
+
+
+### 7. Histogram of the total number of steps taken each day after missing values are imputed
+
+```{r}
+steps <- with(activity.inputed,tapply(steps,date,sum))
+hist(steps,breaks = 50,col = "steelblue",
+     main = "Number of dairy steps distribution (inputed data)",
+     xlab = "Number of steps")
+```
+
+### 8. Panel plot comparing the average number of steps taken per 5-minute interval across weekdays and weekends
+
+```{r}
+library(lattice)
+
+wDays <- weekdays(activity.inputed$date)
+for (i in 1:length(wDays)) {
+        if ( wDays[i] %in% c("sábado","Domingo")) {
+                wDays[i] <- "weekend"
+        } else {
+                wDays[i] <- "weekday"
+        }
+        
+}
+activity.inputed$"weekDays" <- wDays
+intervals <- unique(activity.inputed$interval)
+mean.av <- with(activity.inputed,tapply(steps, interval,
+                                        function(x) mean(x,na.rm = TRUE)))
+#colnames(activity.inputed)
+with(activity.inputed, xyplot(steps~interval|weekDays,type="l"))
+
+```
+
+### 9. All of the R code needed to reproduce the results (numbers, plots, etc.) in the report
+

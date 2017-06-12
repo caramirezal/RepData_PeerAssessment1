@@ -38,7 +38,7 @@ dev.off()
 
 ![](instructions_fig/distributionSteps.png)
 
-As can be seen the data is sparce but it can be seen that the more frequent number of dairy steps is around one thousand steps.
+As can be seen the data is sparce. Additionally, the more frequent number of dairy steps is around one thousand steps.
 
 ### **3. Mean and median of steps for each day**
 

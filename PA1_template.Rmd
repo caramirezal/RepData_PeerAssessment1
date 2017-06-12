@@ -7,6 +7,8 @@ output: html_document
 
 This report shows the analysis and processing of the data about steps activity by time intervals recorded during the day recorded in the period from october to november, 2012.
 
+
+
 ### **1. Reading in the dataset and/or processing the data**
 
 ```{r}
@@ -22,15 +24,19 @@ activity <- transform(activity, date = as.Date(date))
 The next plot shows the distribution of dairy steps in all the data. 
 
 
-```{r}
+```{r, results='hide'}
 ## calculating the total of steps
 steps <- with(activity,tapply(steps,date,sum))
 
 ## plotting results
+png("instructions_fig/distributionSteps.png")
 hist(steps,breaks = 50,col = "steelblue",
      main = "Number of dairy steps distribution",
      xlab = "Number of steps")
+dev.off()
 ```
+
+![](instructions_fig/distributionSteps.png)
 
 As can be seen the data is sparce but it can be seen that the more frequent number of dairy steps is around one thousand steps.
 
@@ -39,20 +45,24 @@ As can be seen the data is sparce but it can be seen that the more frequent numb
 The next plot shows the mean and median of the number of steps. Means (medians) are shown as red (green) points with respect to left (right) axis. 
 
 
-```{r}
+```{r results='hide'}
 ## calculating mean and median
 dates <- unique(activity$date)
 means <- with(activity, tapply(steps,date, function(x) mean(x,na.rm = TRUE)))
 medians <- with(activity, tapply(steps,date, function(x) median(x,na.rm = TRUE)))
 
 ## plotting the data
+png("instructions_fig/meanMedian.png")
 par( mar= c(5,5,5,5))
 plot(dates,means,pch=19,col="red",ylab = "Mean")
 par(new=TRUE)
 plot(dates,medians,pch=20,col="green",axes = FALSE,xlab = NA,ylab = NA)
 axis(side=4)
 mtext(side = 4,line = 3,"Median")
+dev.off()
 ```
+
+![](instructions_fig/meanMedian.png)
 
 From the plot it can be seen that the median are not informative since in the vast majority of time intervals there are zero steps.
 
@@ -60,17 +70,20 @@ From the plot it can be seen that the median are not informative since in the va
 
 The next plot shows the time series of the average of steps over time intervals.
 
-```{r}
+```{r, results='hide'}
 ## calculating average mean for intervals
 intervals <- unique(activity$interval)
 mean.av <- with(activity,tapply(steps, interval,function(x) mean(x,na.rm = TRUE)))
 
 ## plotting data
+png("instructions_fig/averageStepsTimeSeries.png")
 plot(intervals,mean.av,type = "l",col="red",
      main = "Average steps across day intervals",
      ylab = "Average mean",
      xlab = "Time intervals")
+dev.off()
 ```
+![](instructions_fig/averageStepsTimeSeries.png)
 
 The plot shows that the more active intervals regarding number of steps is around the ~8.5 hours.
 
@@ -128,26 +141,31 @@ with(activity.inputed, summary(steps))
 
 The next code shows the analogous hystogram of the first figure in section 2 but using the inputed data.
 
-```{r}
+```{r, results='hide'}
 ## caluculating total number of steps by day
 wDays <- weekdays(activity.inputed$date)
 activity.inputed$"weekDays" <- wDays
 stepsByDay <- tapply(activity.inputed$steps,activity.inputed$date, function(x)                                                                    sum(x,na.rm = TRUE))
 
 ## plotting results
+png("instructions_fig/stepsDistributionInputed.png")
 hist(stepsByDay,breaks = 30,col = "steelblue",
      main = "Number of steps (Inputed data)",
      xlab = "Number of steps")
+dev.off()
 ```
+
+![](instructions_fig/stepsDistributionInputed.png)
 
 No obvious qualitative change is seen in the inputed data in the distribution of the number of steps of each day. In the next code mean and median is caluculated for each day and plotted.
 
-```{r}
+```{r, results='hide'}
 ## calculating the mean and median for each day
 means.in <- tapply(activity.inputed$steps,activity.inputed$date, function(x)                                                                    mean(x,na.rm = TRUE))
 medians.in <- tapply(activity.inputed$steps,activity.inputed$date, function(x)                                                                    median(x,na.rm = TRUE))
 
 ## plotting means and medians of inputed data
+png("instructions_fig/meanMedianInputedData.png")
 par(mar=c(5,5,5,5))
 plot(dates,means.in,
      pch=19,col="red",ylab = "Mean")
@@ -158,26 +176,31 @@ plot(dates, medians.in,
      xlab = NA, ylab = NA)
 axis(side=4)
 mtext(side = 4,line = 3,"Median")
+dev.off()
 ```
+![](instructions_fig/meanMedianInputedData.png)
 
 From the plot it can be seen that medians are still no informative because for each day the majority of the values for intervals is zero steps. Means values now are filled with
 mean values. 
 
 #### **7. Histogram of the total number of steps taken each day after missing values are imputed**
 
-```{r}
+```{r, results='hide'}
 ## calculating the total of steps in the inputed data 
 steps <- with(activity.inputed,tapply(steps,date,sum))
 
 ## plotting the data
+png("instructions_fig/distributionStepsInputedData02.png")
 hist(steps,breaks = 50,col = "steelblue",
      main = "Number of dairy steps distribution (inputed data)",
      xlab = "Number of steps")
+dev.off()
 ```
+![](instructions_fig/distributionStepsInputedData02.png)
 
 ### **8. Panel plot comparing the average number of steps taken per 5-minute interval across weekdays and weekends**
 
-```{r}
+```{r, results='hide'}
 ## change days to weekday/weekend tags
 activityByWeek <- activity.inputed
 wDays <- weekdays(activity.inputed$date)
@@ -195,6 +218,7 @@ activityByWeek <- split(activity.inputed,activity.inputed$weekDays)
 activityByWeek <- lapply(activityByWeek,function(x) tapply(x$steps,x$interval, mean))
 
 ## plotting the results
+png("instructions_fig/averageStepsByWeekDay.png")
 par(mfrow=c(1,2))
 par(mar=c(5,5,5,5))
 plot(intervals,activityByWeek$weekday,
@@ -210,8 +234,10 @@ plot(intervals,activityByWeek$weekend,
      main = "Weekend",
      xlab = "",
      ylab = "")
-
+dev.off()
 ```
+
+![](instructions_fig/averageStepsByWeekDay.png)
 
 From the plot above it can be seen that the studied subject is more active on weekends in terms of the average of steps.
 
